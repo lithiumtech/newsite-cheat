@@ -12,14 +12,50 @@ GREEN=`tput setaf 2`
 BLUE=`tput setaf 14`
 PINK=`tput setaf 13`
 NC=`tput sgr0` #no color / reset
+BLINK=`tput blink`
+
+# VARS
+siteName=""
+childName=""
+nl=$'\n'
+
+# REGEX
+sitePattern="^([A-z0-9])+\/([A-z0-9])+$"
 
 
-read -p "${GREEN}New site name? ${NC}" sitename
-echo "Creating file structure and updating $sitename"
-cd $CUSTOMPATH || exit
-svn update --set-depth=immediates $sitename $sitename/$sitename $sitename/$sitename/stage
-svn update --set-depth=infinity $sitename/$sitename/stage
-cd $sitename/$sitename/stage || exit
+echo "${nl}${GREEN}New site name to download?" 
+read -p "-- (If child directory name is different, use ${PINK}sitename/childname${NC} otherwise just single site name, ${PINK}arlo${NC}) ${BLINK}" siteName
+#read -p "${GREEN}Is there a different secondary folder name, i.e., ${PINK}evinrude/brp${NC} instead of ${PINK}arlo/arlo${NC}? [y/n]" yn
+        # case $yn in 
+        # y|Y)  read -p "${GREEN}What is that folder name?" diffChild ;;
+        # n|n) 
+        # *) 
+        # esac
+
+        if [[ $siteName =~ $sitePattern ]]
+        then
+        # EXCEPTION PATTERN of gm/gmonstar
+            echo "Creating file structure and updating $siteName"
+            cd $CUSTOMPATH || exit
+            parentName="${siteName%/*}"
+            childName="${siteName##*/}"
+            echo "$parentName and $childName"
+
+            svn update --set-depth=immediates $parentName $parentName/$childName $parentName/$childName/stage
+             svn update --set-depth=infinity $parentName/$childName/stage
+             cd $parentName/$childName/stage || exit
+        else
+        
+        # NORMAL PATTERN of arlo/arlo
+            echo "Creating file structure and updating $siteName"
+            cd $CUSTOMPATH || exit
+            svn update --set-depth=immediates $siteName $sitename/$siteName $siteName/$siteName/stage
+            svn update --set-depth=infinity $siteName/$siteName/stage
+            cd $siteName/$siteName/stage || exit
+
+        fi
+
+
 ls
 pwd
 
